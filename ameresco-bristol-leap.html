@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ameresco – Bristol City Leap</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #0e1a10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .carousel-wrapper {
+      width: 100%;
+      max-width: 900px;
+    }
+
+    .carousel {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.65);
+    }
+
+    /* ── Slides ── */
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 44px 60px;
+      text-align: center;
+      opacity: 0;
+      transform: translateX(60px);
+      transition: opacity 0.55s ease, transform 0.55s ease;
+      pointer-events: none;
+    }
+
+    .slide.active  { opacity: 1; transform: translateX(0); pointer-events: auto; }
+    .slide.exit    { opacity: 0; transform: translateX(-60px); }
+
+    /* ── Colour themes – green/teal city palette ── */
+    .slide-1  { background: linear-gradient(145deg, #0b3d0b 0%, #1a6b2f 100%); }
+    .slide-2  { background: linear-gradient(145deg, #003d26 0%, #007a50 100%); }
+    .slide-3  { background: linear-gradient(145deg, #0d3320 0%, #006644 100%); }
+    .slide-4  { background: linear-gradient(145deg, #1a3a00 0%, #4a8c00 100%); }
+    .slide-5  { background: linear-gradient(145deg, #003833 0%, #00897b 100%); }
+    .slide-6  { background: linear-gradient(145deg, #0a2e0a 0%, #2e7d32 100%); }
+    .slide-7  { background: linear-gradient(145deg, #003d2a 0%, #00a878 100%); }
+    .slide-8  { background: linear-gradient(145deg, #1a2e00 0%, #558b2f 100%); }
+    .slide-9  { background: linear-gradient(145deg, #00302b 0%, #00796b 100%); }
+    .slide-10 { background: linear-gradient(145deg, #0b2e0b 0%, #1b5e20 100%); }
+
+    /* Grid overlay */
+    .slide::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    /* City skyline silhouette – decorative bottom strip */
+    .slide::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 900 56'%3E%3Cpath fill='rgba(0,0,0,0.18)' d='M0,56 L0,36 L30,36 L30,24 L50,24 L50,36 L80,36 L80,16 L100,16 L100,36 L120,36 L120,28 L140,28 L140,36 L160,36 L160,10 L175,10 L175,36 L200,36 L200,30 L215,30 L215,36 L240,36 L240,20 L260,20 L260,36 L290,36 L290,26 L310,26 L310,36 L340,36 L340,14 L358,14 L358,36 L380,36 L380,32 L400,32 L400,36 L430,36 L430,18 L450,18 L450,36 L470,36 L470,28 L490,28 L490,36 L520,36 L520,8 L538,8 L538,36 L560,36 L560,24 L580,24 L580,36 L610,36 L610,20 L630,20 L630,36 L660,36 L660,30 L680,30 L680,36 L700,36 L700,12 L718,12 L718,36 L740,36 L740,26 L760,26 L760,36 L790,36 L790,34 L810,34 L810,36 L840,36 L840,16 L860,16 L860,36 L900,36 L900,56 Z'/%3E%3C/svg%3E") no-repeat bottom;
+      background-size: cover;
+      pointer-events: none;
+    }
+
+    .slide-num {
+      position: absolute;
+      top: 18px;
+      right: 22px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+    }
+
+    /* ── Logo ── */
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      z-index: 1;
+    }
+
+    .logo-mark {
+      width: 36px;
+      height: 36px;
+      background: #fff;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 19px;
+      font-weight: 900;
+      color: #1b5e20;
+      flex-shrink: 0;
+    }
+
+    .logo-text { font-size: 20px; font-weight: 800; color: #fff; letter-spacing: 1px; }
+    .logo-text span { color: #a5d6a7; }
+
+    /* ── Leap badge ── */
+    .leap-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(165,214,167,0.18);
+      border: 1px solid rgba(165,214,167,0.4);
+      border-radius: 50px;
+      padding: 6px 16px;
+      margin-bottom: 14px;
+      z-index: 1;
+    }
+
+    .leap-badge .dot-pulse {
+      width: 8px; height: 8px;
+      background: #a5d6a7;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.5; transform: scale(1.4); }
+    }
+
+    .leap-badge span {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #a5d6a7;
+      text-transform: uppercase;
+    }
+
+    /* ── Text ── */
+    .eyebrow {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+      margin-bottom: 10px;
+      z-index: 1;
+    }
+
+    h2 {
+      font-size: clamp(22px, 3.5vw, 36px);
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.2;
+      margin-bottom: 14px;
+      z-index: 1;
+    }
+
+    h2 em { font-style: normal; color: #a5d6a7; }
+
+    p.body {
+      font-size: clamp(13px, 1.7vw, 16px);
+      color: rgba(255,255,255,0.82);
+      line-height: 1.65;
+      max-width: 620px;
+      z-index: 1;
+    }
+
+    /* ── Stats ── */
+    .stats {
+      display: flex;
+      gap: 24px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+      z-index: 1;
+    }
+
+    .stat {
+      background: rgba(255,255,255,0.11);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 12px;
+      padding: 14px 22px;
+      min-width: 120px;
+    }
+
+    .stat-value {
+      font-size: clamp(24px, 3.8vw, 38px);
+      font-weight: 900;
+      color: #a5d6a7;
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: rgba(255,255,255,0.6);
+      margin-top: 4px;
+      line-height: 1.3;
+    }
+
+    /* ── Icon list ── */
+    .icon-list {
+      display: flex;
+      flex-direction: column;
+      gap: 11px;
+      margin-top: 14px;
+      text-align: left;
+      z-index: 1;
+    }
+
+    .icon-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: rgba(255,255,255,0.09);
+      border-radius: 10px;
+      padding: 11px 15px;
+      max-width: 620px;
+    }
+
+    .icon-item .ico { font-size: 20px; flex-shrink: 0; line-height: 1.4; }
+    .icon-item .txt { font-size: clamp(12px, 1.55vw, 14px); color: rgba(255,255,255,0.85); line-height: 1.45; }
+    .icon-item .txt strong { color: #fff; display: block; margin-bottom: 2px; }
+
+    /* ── Timeline ── */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin-top: 14px;
+      text-align: left;
+      z-index: 1;
+      max-width: 600px;
+      width: 100%;
+    }
+
+    .tl-item {
+      display: flex;
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    .tl-spine {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+      width: 20px;
+    }
+
+    .tl-node {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: #a5d6a7;
+      flex-shrink: 0;
+      margin-top: 4px;
+    }
+
+    .tl-line {
+      flex: 1;
+      width: 2px;
+      background: rgba(165,214,167,0.3);
+    }
+
+    .tl-item:last-child .tl-line { display: none; }
+
+    .tl-content {
+      padding-bottom: 14px;
+    }
+
+    .tl-year { font-size: 11px; font-weight: 700; color: #a5d6a7; letter-spacing: 1px; }
+    .tl-text { font-size: clamp(12px, 1.5vw, 14px); color: rgba(255,255,255,0.82); margin-top: 2px; line-height: 1.4; }
+    .tl-text strong { color: #fff; }
+
+    /* ── CTA ── */
+    .cta {
+      display: inline-block;
+      margin-top: 22px;
+      padding: 13px 30px;
+      background: #a5d6a7;
+      color: #1b3a1b;
+      font-size: 15px;
+      font-weight: 800;
+      border-radius: 50px;
+      text-decoration: none;
+      letter-spacing: 0.3px;
+      z-index: 1;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
+    /* ── Blobs ── */
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(65px);
+      opacity: 0.15;
+      pointer-events: none;
+    }
+
+    .blob-1 { width: 280px; height: 280px; background: #a5d6a7; top: -70px; right: -70px; }
+    .blob-2 { width: 200px; height: 200px; background: #80cbc4;  bottom: -50px; left: -40px; }
+
+    /* ── Nav ── */
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 22px;
+    }
+
+    .nav-btn {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-btn:hover { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.6); }
+
+    .dots { display: flex; gap: 8px; }
+
+    .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+      cursor: pointer;
+      transition: background 0.25s, transform 0.25s;
+      border: none;
+    }
+
+    .dot.active { background: #a5d6a7; transform: scale(1.4); }
+
+    .progress-bar { height: 3px; background: rgba(255,255,255,0.12); border-radius: 2px; margin-top: 12px; overflow: hidden; }
+    .progress-fill { height: 100%; background: #a5d6a7; border-radius: 2px; transition: width 0.55s ease; }
+  </style>
+</head>
+<body>
+
+<div class="carousel-wrapper">
+  <div class="carousel" id="carousel">
+
+    <!-- ── SLIDE 1 – Title ── -->
+    <div class="slide slide-1 active">
+      <div class="blob blob-1"></div>
+      <div class="blob blob-2"></div>
+      <div class="slide-num">01 / 10</div>
+      <div class="logo">
+        <div class="logo-mark">A</div>
+        <div class="logo-text">AMERESCO <span>UK</span></div>
+      </div>
+      <div class="leap-badge"><div class="dot-pulse"></div><span>Bristol City Leap</span></div>
+      <h2>Transforming Bristol into<br><em>a Net Zero City</em></h2>
+      <p class="body">Bristol City Leap is one of the UK's most ambitious city-scale energy transition partnerships — uniting Bristol City Council and Ameresco to reimagine how a major British city generates, distributes, and consumes energy.</p>
+    </div>
+
+    <!-- ── SLIDE 2 – What is City Leap? ── -->
+    <div class="slide slide-2">
+      <div class="blob blob-1"></div>
+      <div class="slide-num">02 / 10</div>
+      <div class="eyebrow">What is City Leap?</div>
+      <h2>A 20-Year City Energy<br><em>Investment Partnership</em></h2>
+      <p class="body">Bristol City Leap is a long-term Energy Services Partnership between Bristol City Council and Ameresco — designed to attract private investment into local clean energy infrastructure at scale, accelerating Bristol's journey to carbon neutrality.</p>
+      <div class="stats">
+        <div class="stat"><div class="stat-value">£1bn+</div><div class="stat-label">Planned Investment Pipeline</div></div>
+        <div class="stat"><div class="stat-value">20yr</div><div class="stat-label">Partnership Duration</div></div>
+        <div class="stat"><div class="stat-value">2030</div><div class="stat-label">City Carbon Neutrality Target</div></div>
+      </div>
+    </div>
+
+    <!-- ── SLIDE 3 – Why Bristol? ── -->
+    <div class="slide slide-3">
+      <div class="blob blob-2"></div>
+      <div class="slide-num">03 / 10</div>
+      <div class="eyebrow">Why Bristol?</div>
+      <h2>A City Built for<br><em>Climate Leadership</em></h2>
+      <p class="body">Bristol has long been a pioneer in sustainability — the UK's first European Green Capital in 2015. Building on this legacy, City Leap represents the next chapter: a replicable model for how UK cities can decarbonise their entire energy systems through public-private partnership.</p>
+      <div class="icon-list">
+        <div class="icon-item"><span class="ico">🏆</span><div class="txt"><strong>European Green Capital 2015</strong>Bristol's sustainability credentials made it the natural home for a landmark energy partnership.</div></div>
+        <div class="icon-item"><span class="ico">🌍</span><div class="txt"><strong>Replicable City Model</strong>Designed from the outset to be scaled and replicated across UK and European cities.</div></div>
+        <div class="icon-item"><span class="ico">🤝</span><div class="txt"><strong>Community-Centred Approach</strong>Placing Bristol residents and businesses at the heart of the energy transition.</div></div>
+      </div>
+    </div>
+
+    <!-- ── SLIDE 4 – Partnership Structure ── -->
+    <div class="slide slide-4">
+      <div class="blob blob-1"></div>
+      <div class="slide-num">04 / 10</div>
+      <div class="eyebrow">Partnership Structure</div>
+      <h2>How the <em>Partnership Works</em></h2>
+      <div class="icon-list">
+        <div class="icon-item"><span class="ico">🏛️</span><div class="txt"><strong>Bristol City Council</strong>Provides strategic direction, land, planning support, and a pipeline of city assets and projects.</div></div>
+        <div class="icon-item"><span class="ico">⚡</span><div class="txt"><strong>Ameresco — Private Sector Partner</strong>Brings investment capital, technical expertise, project delivery, and energy market knowledge.</div></div>
+        <div class="icon-item"><span class="ico">🔗</span><div class="txt"><strong>Joint Venture Vehicle</strong>A shared Special Purpose Vehicle (SPV) governs investment decisions, revenues, and risk allocation between both partners.</div></div>
+        <div class="icon-item"><span class="ico">👥</span><div class="txt"><strong>Community Energy Groups</strong>Local energy co-operatives involved in governance, ensuring benefits flow back to Bristol residents.</div></div>
+      </div>
+    </div>
+
+    <!-- ── SLIDE 5 – What Will Be Built ── -->
+    <div class="slide slide-5">
+      <div class="blob blob-1"></div>
+      <div class="blob blob-2"></div>
+      <div class="slide-num">05 / 10</div>
+      <div class="eyebrow">Infrastructure</div>
+      <h2>Clean Energy Infrastructure<br><em>Across the City</em></h2>
+      <div class="icon-list">
+        <div class="icon-item"><span class="ico">🌡️</span><div class="txt"><strong>District Heat Networks</strong>City-wide low-carbon heat networks connecting homes, offices, hospitals, and public buildings.</div></div>
+        <div class="icon-item"><span class="ico">☀️</span><div class="txt"><strong>Solar PV at Scale</strong>Rooftop, ground-mount and community solar across Bristol's public estate and residential areas.</div></div>
+        <div class="icon-item"><span class="ico">🔋</span><div class="txt"><strong>Battery Energy Storage</strong>Grid-scale BESS to balance local supply and demand, reducing reliance on fossil-fuel peaking.</div></div>
+        <div class="icon-item"><span class="ico">🚗</span><div class="txt"><strong>EV Charging Network</strong>Public and depot charging infrastructure to support the transition of Bristol's vehicle fleet.</div></div>
+      </div>
+    </div>
+
+    <!-- ── SLIDE 6 – Decarbonising Homes ── -->
+    <div class="slide slide-6">
+      <div class="blob blob-2"></div>
+      <div class="slide-num">06 / 10</div>
+      <div class="eyebrow">Homes &amp; Communities</div>
+      <h2>Warmer Homes,<br><em>Lower Bills, Less Carbon</em></h2>
+      <p class="body">City Leap is not just about infrastructure — it's about people. The partnership targets energy poverty directly, delivering retrofit programmes that reduce fuel bills and carbon emissions in Bristol's most vulnerable households.</p>
+      <div class="stats">
+        <div class="stat"><div class="stat-value">10,000s</div><div class="stat-label">Homes Targeted for Retrofit</div></div>
+        <div class="stat"><div class="stat-value">40%</div><div class="stat-label">Avg. Heating Bill Reduction</div></div>
+        <div class="stat"><div class="stat-value">EPC C</div><div class="stat-label">Minimum Standard Ambition</div></div>
+      </div>
+    </div>
+
+    <!-- ── SLIDE 7 – Climate Targets ── -->
+    <div class="slide slide-7">
+      <div class="blob blob-1"></div>
+      <div class="slide-num">07 / 10</div>
+      <div class="eyebrow">Climate Action</div>
+      <h2>Aligned to Bristol's<br><em>Climate Emergency Declaration</em></h2>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-spine"><div class="tl-node"></div><div class="tl-line"></div></div>
+          <div class="tl-content"><div class="tl-year">2023 – 2025</div><div class="tl-text"><strong>Programme Initiation</strong> — First tranche of projects mobilised; heat network feasibility and solar portfolio deployment begin.</div></div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-spine"><div class="tl-node"></div><div class="tl-line"></div></div>
+          <div class="tl-content"><div class="tl-year">2025 – 2028</div><div class="tl-text"><strong>Scale-Up Phase</strong> — District heat networks commissioned; EV infrastructure rolled out; 1,000s of home retrofits complete.</div></div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-spine"><div class="tl-node"></div><div class="tl-line"></div></div>
+          <div class="tl-content"><div class="tl-year">2030</div><div class="tl-text"><strong>Carbon Neutrality Milestone</strong> — Bristol targets carbon neutrality for city operations, with City Leap infrastructure at the core.</div></div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-spine"><div class="tl-node"></div></div>
+          <div class="tl-content"><div class="tl-year">2030 – 2043</div><div class="tl-text"><strong>Sustained Delivery</strong> — Continued investment, whole-city decarbonisation, and community energy benefit-sharing.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SLIDE 8 – Wider Cities Vision ── -->
+    <div class="slide slide-8">
+      <div class="blob blob-1"></div>
+      <div class="blob blob-2"></div>
+      <div class="slide-num">08 / 10</div>
+      <div class="eyebrow">A Blueprint for UK Cities</div>
+      <h2>From Bristol to<br><em>Every UK City</em></h2>
+      <p class="body">Bristol City Leap is a proof of concept for an entirely new approach to urban energy transition — one that mobilises private finance, builds community wealth, and delivers measurable carbon reductions without burdening public balance sheets.</p>
+      <div class="icon-list">
+        <div class="icon-item"><span class="ico">🗺️</span><div class="txt"><strong>Replicable Everywhere</strong>The City Leap model is designed to be adapted for any UK local authority, regardless of size or geography.</div></div>
+        <div class="icon-item"><span class="ico">💰</span><div class="txt"><strong>No Net Cost to the Public Purse</strong>Private investment structured to generate returns through energy revenues — freeing up council budgets.</div></div>
+        <div class="icon-item"><span class="ico">📈</span><div class="txt"><strong>Scalable Pipeline</strong>Ameresco is actively exploring City Leap-style partnerships with authorities across England, Wales, and Scotland.</div></div>
+      </div>
+    </div>
+
+    <!-- ── SLIDE 9 – Social Value ── -->
+    <div class="slide slide-9">
+      <div class="blob blob-2"></div>
+      <div class="slide-num">09 / 10</div>
+      <div class="eyebrow">Social Value &amp; Jobs</div>
+      <h2>A Green Economy<br><em>for Bristol's People</em></h2>
+      <p class="body">City Leap is as much about social and economic regeneration as it is about carbon. Ameresco is committed to local supply chain development, apprenticeships, and ensuring the benefits of clean energy are shared equitably across the city.</p>
+      <div class="stats">
+        <div class="stat"><div class="stat-value">1,000+</div><div class="stat-label">Local Jobs &amp; Apprenticeships</div></div>
+        <div class="stat"><div class="stat-value">£m</div><div class="stat-label">Social Value Committed</div></div>
+        <div class="stat"><div class="stat-value">Local</div><div class="stat-label">Supply Chain First Policy</div></div>
+      </div>
+    </div>
+
+    <!-- ── SLIDE 10 – CTA ── -->
+    <div class="slide slide-10">
+      <div class="blob blob-1"></div>
+      <div class="blob blob-2"></div>
+      <div class="slide-num">10 / 10</div>
+      <div class="logo">
+        <div class="logo-mark">A</div>
+        <div class="logo-text">AMERESCO <span>UK</span></div>
+      </div>
+      <div class="leap-badge"><div class="dot-pulse"></div><span>Bristol City Leap</span></div>
+      <h2>Partner with Us to<br><em>Build the Net Zero City</em></h2>
+      <p class="body">Whether you lead a local authority, manage a city estate, or want to bring City Leap-style ambition to your region — Ameresco has the expertise, capital, and commitment to make it happen.</p>
+      <a class="cta" href="https://www.ameresco.com/uk" target="_blank" rel="noopener">Learn More at Ameresco UK →</a>
+    </div>
+
+  </div><!-- /.carousel -->
+
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill" style="width:10%"></div>
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn" id="prevBtn" aria-label="Previous slide">&#8592;</button>
+    <div class="dots" id="dots"></div>
+    <button class="nav-btn" id="nextBtn" aria-label="Next slide">&#8594;</button>
+  </div>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const dotsContainer = document.getElementById('dots');
+  const progressFill = document.getElementById('progressFill');
+  let current = 0;
+  let autoTimer;
+
+  slides.forEach((_, i) => {
+    const d = document.createElement('button');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.setAttribute('aria-label', `Go to slide ${i + 1}`);
+    d.addEventListener('click', () => goTo(i));
+    dotsContainer.appendChild(d);
+  });
+
+  function goTo(next) {
+    if (next === current) return;
+    const outgoing = slides[current];
+    outgoing.classList.add('exit');
+    outgoing.classList.remove('active');
+    setTimeout(() => outgoing.classList.remove('exit'), 600);
+    current = (next + slides.length) % slides.length;
+    slides[current].classList.add('active');
+    dotsContainer.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === current));
+    progressFill.style.width = ((current + 1) / slides.length * 100) + '%';
+    resetAuto();
+  }
+
+  function resetAuto() {
+    clearInterval(autoTimer);
+    autoTimer = setInterval(() => goTo(current + 1), 6000);
+  }
+
+  document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
+  document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') goTo(current + 1);
+    if (e.key === 'ArrowLeft')  goTo(current - 1);
+  });
+
+  let touchStartX = 0;
+  const carousel = document.getElementById('carousel');
+  carousel.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+  carousel.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) > 40) goTo(dx < 0 ? current + 1 : current - 1);
+  });
+
+  resetAuto();
+</script>
+</body>
+</html>
