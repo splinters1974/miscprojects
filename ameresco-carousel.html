@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ameresco UK – Energy Solutions Carousel</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #0a1628;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    /* ── Carousel shell ── */
+    .carousel-wrapper {
+      width: 100%;
+      max-width: 900px;
+    }
+
+    .carousel {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+    }
+
+    /* ── Slides ── */
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 60px;
+      text-align: center;
+      opacity: 0;
+      transform: translateX(60px);
+      transition: opacity 0.55s ease, transform 0.55s ease;
+      pointer-events: none;
+    }
+
+    .slide.active {
+      opacity: 1;
+      transform: translateX(0);
+      pointer-events: auto;
+    }
+
+    .slide.exit {
+      opacity: 0;
+      transform: translateX(-60px);
+    }
+
+    /* ── Slide colour themes ── */
+    .slide-1  { background: linear-gradient(145deg, #003a70 0%, #005baa 100%); }
+    .slide-2  { background: linear-gradient(145deg, #005baa 0%, #00aeef 100%); }
+    .slide-3  { background: linear-gradient(145deg, #1a6b2f 0%, #2ecc71 100%); }
+    .slide-4  { background: linear-gradient(145deg, #003a70 0%, #0072c6 100%); }
+    .slide-5  { background: linear-gradient(145deg, #1a4a1a 0%, #27ae60 100%); }
+    .slide-6  { background: linear-gradient(145deg, #0d3b6e 0%, #1a8fc1 100%); }
+    .slide-7  { background: linear-gradient(145deg, #004030 0%, #00a878 100%); }
+    .slide-8  { background: linear-gradient(145deg, #1c2f5e 0%, #3a6bc8 100%); }
+    .slide-9  { background: linear-gradient(145deg, #002d1e 0%, #00875a 100%); }
+    .slide-10 { background: linear-gradient(145deg, #001f40 0%, #004080 100%); }
+
+    /* Subtle grid overlay */
+    .slide::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    /* ── Slide number badge ── */
+    .slide-num {
+      position: absolute;
+      top: 18px;
+      right: 22px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: rgba(255,255,255,0.45);
+      text-transform: uppercase;
+    }
+
+    /* ── Logo area ── */
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+      z-index: 1;
+    }
+
+    .logo-mark {
+      width: 38px;
+      height: 38px;
+      background: #fff;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 900;
+      color: #004080;
+      letter-spacing: -1px;
+      flex-shrink: 0;
+    }
+
+    .logo-text {
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 1px;
+    }
+
+    .logo-text span { color: #7dd3fc; }
+
+    /* ── Content ── */
+    .eyebrow {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 12px;
+      z-index: 1;
+    }
+
+    h2 {
+      font-size: clamp(22px, 3.5vw, 36px);
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.2;
+      margin-bottom: 16px;
+      z-index: 1;
+    }
+
+    h2 em {
+      font-style: normal;
+      color: #7dd3fc;
+    }
+
+    p.body {
+      font-size: clamp(13px, 1.8vw, 17px);
+      color: rgba(255,255,255,0.82);
+      line-height: 1.65;
+      max-width: 620px;
+      z-index: 1;
+    }
+
+    /* ── Stat grid ── */
+    .stats {
+      display: flex;
+      gap: 28px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+      z-index: 1;
+    }
+
+    .stat {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 12px;
+      padding: 16px 24px;
+      min-width: 130px;
+    }
+
+    .stat-value {
+      font-size: clamp(26px, 4vw, 40px);
+      font-weight: 900;
+      color: #7dd3fc;
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: rgba(255,255,255,0.65);
+      margin-top: 4px;
+      line-height: 1.3;
+    }
+
+    /* ── Icon list ── */
+    .icon-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 16px;
+      text-align: left;
+      z-index: 1;
+    }
+
+    .icon-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 12px 16px;
+      max-width: 600px;
+    }
+
+    .icon-item .ico { font-size: 22px; flex-shrink: 0; line-height: 1.3; }
+    .icon-item .txt { font-size: clamp(12px, 1.6vw, 15px); color: rgba(255,255,255,0.87); line-height: 1.45; }
+    .icon-item .txt strong { color: #fff; display: block; margin-bottom: 2px; }
+
+    /* ── CTA button ── */
+    .cta {
+      display: inline-block;
+      margin-top: 24px;
+      padding: 14px 32px;
+      background: #fff;
+      color: #004080;
+      font-size: 15px;
+      font-weight: 800;
+      border-radius: 50px;
+      text-decoration: none;
+      letter-spacing: 0.3px;
+      z-index: 1;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    }
+
+    /* ── Navigation ── */
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .nav-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+
+    .nav-btn:hover { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.6); }
+
+    .dots {
+      display: flex;
+      gap: 8px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+      cursor: pointer;
+      transition: background 0.25s, transform 0.25s;
+      border: none;
+    }
+
+    .dot.active {
+      background: #7dd3fc;
+      transform: scale(1.4);
+    }
+
+    /* ── Progress bar ── */
+    .progress-bar {
+      height: 3px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 2px;
+      margin-top: 14px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #7dd3fc;
+      border-radius: 2px;
+      transition: width 0.55s ease;
+    }
+
+    /* ── Decorative blob ── */
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(60px);
+      opacity: 0.18;
+      pointer-events: none;
+    }
+
+    .blob-1 { width: 300px; height: 300px; background: #fff; top: -80px; right: -80px; }
+    .blob-2 { width: 200px; height: 200px; background: #7dd3fc; bottom: -60px; left: -40px; }
+  </style>
+</head>
+<body>
+
+<div class="carousel-wrapper">
+  <div class="carousel" id="carousel">
+
+    <!-- ── SLIDE 1 – Title / Brand ── -->
+    <div class="slide slide-1 active">
+      <div class="blob blob-1"></div>
+      <div class="blob blob-2"></div>
+      <div class="slide-num">01 / 10</div>
+      <div class="logo">
+        <div class="logo-mark">A</div>
+        <div class="logo-text">AMERESCO <span>UK</span></div>
+      </div>
+      <div class="eyebrow">Clean Energy · Sustainability · Net Zero</div>
+      <h2>Powering the UK's<br><em>Clean Energy Future</em></h2>
+      <p class="body">Ameresco is a leading energy efficiency and renewable energy company delivering integrated solutions across the public and private sectors throughout the United Kingdom.</p>
+    </div>
+
+    <!-- ── SLIDE 2 – Who We Are ── -->
+    <div class="slide slide-2">
+      <div class="blob blob-1"></div>
+      <div class="slide-num">02 / 10</div>
+      <div class="eyebrow">Who We Are</div>
+      <h2>A Trusted Partner in<br><em>Energy Transformation</em></h2>
+      <p class="body">With decades of global experience and a dedicated UK team, Ameresco brings unrivalled expertise in energy services contracting, decarbonisation strategy, and green infrastructure development — helping organisations achieve lasting savings and sustainability goals.</p>
+      <div class="stats">
+        <div class="stat"><div class="stat-value">1,000+</div><div class="stat-label">Projects Delivered Globally</div></div>
+        <div class="stat"><div class="stat-value">£bn</div><div class="stat-label">Assets Under Management</div></div>
+        <div class="stat"><div class="stat-value">25+</div><div class="stat-label">Years' Experience</div></div>
+      </div>
+    </div>
+
+    <!-- ── SLIDE 3 – Net Zero Commitment ── -->
+    <div class="slide slide-3">
+      <div class="blob blob-1"></div>
+      <div class="blob blob-2"></div>
+      <div class="slide-num">03 / 10</div>
+      <div class="eyebrow">Net Zero</div>
+      <h2>Your Roadmap to<br><em>Net Zero Carbon</em></h2>
+      <p class="body">We design and deliver bespoke decarbonisation roadmaps — from baseline carbon assessments through to full implementation — enabling public sector bodies, NHS trusts, universities, and local authorities to meet their 2030 and 2050 targets with confidence.</p>
+      <div class="stats">
+        <div class="stat"><div class="stat-value">50%</div><div class="stat-label">Average Energy Cost Reduction</div></div>
+        <div class="stat"><div class="stat-value">MtCO₂</div><div class="stat-label">Emissions Avoided Annually</div></div>
+      </div>
+    </div>
+
+    <!-- ── SLIDE 4 – Energy as a Service ── -->
+    <div class="slide slide-4">
+      <div class="blob blob-1"></div>
+      <div class="slide-num">04 / 10</div>
+      <div class="eyebrow">Energy as a Service</div>
+      <h2>Zero Capital,<br><em>Maximum Impact</em></h2>
+      <div class="icon-list">
+        <div class="icon-item"><span class="ico">💷</span><div class="txt"><strong>Self-Financing Projects</strong>Energy savings fund the full cost of upgrades — no upfront capital required.</div></div>
+        <div class="icon-item"><span class="ico">📋</span><div class="txt"><strong>Energy Performance Contracts (EPCs)</strong>Guaranteed savings backed by Ameresco — risk transferred away from your organisation.</div></div>
+        <div class="icon-item"><span class="ico">🔁</span><div class="txt"><strong>Flexible Finance Structures</strong>Operating leases, managed energy services, and third-party finance options available.</div></div>
+      </div>
+    </div>
+
+    <!-- ── SLIDE 5 – Renewable Energy ── -->
+    <div class="slide slide-5">
+      <div class="blob blob-2"></div>
+      <div class="slide-num">05 / 10</div>
+      <div class="eyebrow">Renewable Energy</div>
+      <h2>Generating Clean Power<br><em>On-Site &amp; At Scale</em></h2>
+      <div class="icon-list">
+        <div class="icon-item"><span class="ico">☀️</span><div class="txt"><strong>Solar PV &amp; Battery Storage</strong>Rooftop, ground-mount and carport solar paired with grid-scale BESS.</div></div>
+        <div class="icon-item"><span class="ico">🌬️</span><div class="txt"><strong>Wind &amp; Biomass</strong>Community and commercial wind, alongside low-carbon heat from biomass.</div></div>
+        <div class="icon-item"><span class="ico">🔋</span><div class="txt"><strong>EV Charging Infrastructure</strong>Integrated EV networks to support fleet electrification across your estate.</div></div>
+      </div>
+    </div>
+
+    <!-- ── SLIDE 6 – Public Sector Focus ── -->
+    <div class="slide slide-6">
+      <div class="blob blob-1"></div>
+      <div class="blob blob-2"></div>
+      <div class="slide-num">06 / 10</div>
+      <div class="eyebrow">Public Sector Specialists</div>
+      <h2>Serving the<br><em>Heart of Public Services</em></h2>
+      <p class="body">Ameresco UK has deep experience working with complex public sector estates, navigating procurement frameworks and compliance requirements so you don't have to.</p>
+      <div class="stats">
+        <div class="stat"><div class="stat-value">NHS</div><div class="stat-label">Trusts &amp; Health Boards</div></div>
+        <div class="stat"><div class="stat-value">HE</div><div class="stat-label">Universities &amp; Colleges</div></div>
+        <div class="stat"><div class="stat-value">LA</div><div class="stat-label">Local Authorities &amp; MOD</div></div>
+      </div>
+    </div>
+
+    <!-- ── SLIDE 7 – Smart Buildings & IoT ── -->
+    <div class="slide slide-7">
+      <div class="blob blob-1"></div>
+      <div class="slide-num">07 / 10</div>
+      <div class="eyebrow">Smart Technology</div>
+      <h2>Intelligent Buildings,<br><em>Smarter Energy Use</em></h2>
+      <div class="icon-list">
+        <div class="icon-item"><span class="ico">🏢</span><div class="txt"><strong>Building Energy Management Systems</strong>Real-time monitoring and automated controls to optimise every kilowatt-hour.</div></div>
+        <div class="icon-item"><span class="ico">📡</span><div class="txt"><strong>IoT Sensor Networks</strong>Granular data collection enabling predictive maintenance and demand-side flexibility.</div></div>
+        <div class="icon-item"><span class="ico">📊</span><div class="txt"><strong>Ameresco Analytics Platform</strong>Cloud-based dashboards giving you visibility, reporting, and actionable insight 24/7.</div></div>
+      </div>
+    </div>
+
+    <!-- ── SLIDE 8 – Procurement Frameworks ── -->
+    <div class="slide slide-8">
+      <div class="blob blob-2"></div>
+      <div class="slide-num">08 / 10</div>
+      <div class="eyebrow">Procurement Made Simple</div>
+      <h2>Compliant, Fast-Track<br><em>Procurement Routes</em></h2>
+      <p class="body">Access Ameresco's services through established UK public sector frameworks — removing the burden of lengthy OJEU/FTS tender processes and accelerating project delivery.</p>
+      <div class="icon-list">
+        <div class="icon-item"><span class="ico">✅</span><div class="txt"><strong>Crown Commercial Service (CCS)</strong>Energy &amp; Technology frameworks for central government and wider public sector.</div></div>
+        <div class="icon-item"><span class="ico">✅</span><div class="txt"><strong>NHS Shared Business Services (NHS SBS)</strong>Specialist health sector routes with OJEU-compliant call-off.</div></div>
+        <div class="icon-item"><span class="ico">✅</span><div class="txt"><strong>ESPO &amp; YPO Energy Frameworks</strong>Local authority and education procurement frameworks available nationwide.</div></div>
+      </div>
+    </div>
+
+    <!-- ── SLIDE 9 – Case Study Highlight ── -->
+    <div class="slide slide-9">
+      <div class="blob blob-1"></div>
+      <div class="blob blob-2"></div>
+      <div class="slide-num">09 / 10</div>
+      <div class="eyebrow">Case Study</div>
+      <h2>Delivering Results<br><em>Across the UK Estate</em></h2>
+      <p class="body">From multi-site NHS energy performance contracts saving millions in operational costs, to university solar portfolios generating clean electricity for decades — Ameresco's UK portfolio demonstrates measurable, lasting impact.</p>
+      <div class="stats">
+        <div class="stat"><div class="stat-value">£40M+</div><div class="stat-label">Guaranteed Savings Delivered</div></div>
+        <div class="stat"><div class="stat-value">25yr</div><div class="stat-label">Long-Term Performance Guarantees</div></div>
+        <div class="stat"><div class="stat-value">100%</div><div class="stat-label">On-Time Project Delivery</div></div>
+      </div>
+    </div>
+
+    <!-- ── SLIDE 10 – CTA / Get in Touch ── -->
+    <div class="slide slide-10">
+      <div class="blob blob-1"></div>
+      <div class="blob blob-2"></div>
+      <div class="slide-num">10 / 10</div>
+      <div class="logo">
+        <div class="logo-mark">A</div>
+        <div class="logo-text">AMERESCO <span>UK</span></div>
+      </div>
+      <div class="eyebrow">Start Your Journey Today</div>
+      <h2>Ready to Transform<br><em>Your Energy Future?</em></h2>
+      <p class="body">Talk to our UK team about a no-obligation energy audit, decarbonisation roadmap, or financing feasibility study. Let's build a cleaner, more cost-effective estate — together.</p>
+      <a class="cta" href="https://www.ameresco.com/uk" target="_blank" rel="noopener">Visit Ameresco UK →</a>
+    </div>
+
+  </div><!-- /.carousel -->
+
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill" style="width:10%"></div>
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn" id="prevBtn" aria-label="Previous slide">&#8592;</button>
+    <div class="dots" id="dots"></div>
+    <button class="nav-btn" id="nextBtn" aria-label="Next slide">&#8594;</button>
+  </div>
+</div><!-- /.carousel-wrapper -->
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const dotsContainer = document.getElementById('dots');
+  const progressFill = document.getElementById('progressFill');
+  let current = 0;
+  let autoTimer;
+
+  // Build dots
+  slides.forEach((_, i) => {
+    const d = document.createElement('button');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.setAttribute('aria-label', `Go to slide ${i + 1}`);
+    d.addEventListener('click', () => goTo(i));
+    dotsContainer.appendChild(d);
+  });
+
+  function goTo(next) {
+    if (next === current) return;
+    const outgoing = slides[current];
+    outgoing.classList.add('exit');
+    outgoing.classList.remove('active');
+    setTimeout(() => outgoing.classList.remove('exit'), 600);
+
+    current = (next + slides.length) % slides.length;
+    slides[current].classList.add('active');
+
+    // Update dots
+    dotsContainer.querySelectorAll('.dot').forEach((d, i) => {
+      d.classList.toggle('active', i === current);
+    });
+
+    // Update progress bar
+    progressFill.style.width = ((current + 1) / slides.length * 100) + '%';
+
+    resetAuto();
+  }
+
+  function resetAuto() {
+    clearInterval(autoTimer);
+    autoTimer = setInterval(() => goTo(current + 1), 6000);
+  }
+
+  document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
+  document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
+
+  // Keyboard navigation
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') goTo(current + 1);
+    if (e.key === 'ArrowLeft')  goTo(current - 1);
+  });
+
+  // Touch / swipe support
+  let touchStartX = 0;
+  const carousel = document.getElementById('carousel');
+  carousel.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+  carousel.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) > 40) goTo(dx < 0 ? current + 1 : current - 1);
+  });
+
+  resetAuto();
+</script>
+</body>
+</html>
